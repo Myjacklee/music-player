@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         initView();
         mediaPlayer=new MediaPlayer();
         musicDatas= new ArrayList<>();
-        // 创建适配器对象
+        // 创建适配器对象,recyclerView的适配器是由recyclerViewAdapter来完成的
         adapter=new localMusicAdapter(this,musicDatas);
         musicRv.setAdapter(adapter);
         // 设置布局管理器
@@ -49,12 +49,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         loadLocalMusicDatas();
         // 设置每一项的点击事件
         setEventListener();
+        setMediaPlayerFinishListener();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         stopMusic();
+        mediaPlayer.release();
+        mediaPlayer=null;
     }
 
     private void setEventListener() {
@@ -64,6 +67,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 currentPlayPosition=position;
                 localMusicBean musicBean = musicDatas.get(position);
                 playMusicInBean(musicBean);
+            }
+        });
+    }
+
+    private void setMediaPlayerFinishListener(){
+        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                stopMusic();
             }
         });
     }
@@ -93,8 +105,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             // 从暂停位置开始播放音乐
             mediaPlayer.seekTo(currentPausePosition);
             mediaPlayer.start();
-
-
             playIv.setImageResource(R.mipmap.player_pause_circle);
         }
     }
